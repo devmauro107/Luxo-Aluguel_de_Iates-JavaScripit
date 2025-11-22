@@ -1,3 +1,4 @@
+// Função para obter todas as mensagens da API
 function obterMensagens() {
     return fetch('https://app-p2-js-c88e9128234a.herokuapp.com/mensagens', {
         method: 'GET',
@@ -15,6 +16,7 @@ function obterMensagens() {
     });
 }
 
+// Função para inserir uma nova mensagem na API
 function inserirMensagem(mensagem) {
     // mensagem: { nome, email, mensagem }
     // Retorna uma Promise com o resultado do POST (texto ou JSON)
@@ -43,6 +45,7 @@ function inserirMensagem(mensagem) {
     });
 }
 
+// Função para validar login do usuário
 function validarUsuario(objLoginSenha) {
     // objLoginSenha: { email, senha }
     // Retorna uma Promise que resolve para true/false (ou false em caso de erro)
@@ -59,6 +62,23 @@ function validarUsuario(objLoginSenha) {
         if (!response.ok) {
             return false;
         }
+        return response.json();
+    })
+    .catch(function(err) {
+        console.error(err);
+        return false;
+    });
+}
+
+function excluirMensagem(id) {
+    return fetch('https://app-p2-js-c88e9128234a.herokuapp.com/mensagens/' + id, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (!response.ok) throw new Error('Erro ao excluir mensagem: ' + response.status);
         return response.json();
     })
     .catch(function(err) {

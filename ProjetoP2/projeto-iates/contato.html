@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luxo - Contato</title>
-    <link rel="shortcut icon" href="images/barco2.png" type="image/x-icon" />
-    <link rel="stylesheet" href="css/default.css" />
+      <title>Luxo - Contato</title>
+      <link rel="shortcut icon" href="images/barco2.png" type="image/x-icon" />
+      <link rel="stylesheet" href="css/default.css" />
   </head>
 
   <body>
@@ -59,6 +59,13 @@
             ></textarea>
           </div>
 
+          <div
+            id="contatoFeedback"
+            role="status"
+            aria-live="polite"
+            style="margin: 8px 0; color: #a00"
+          ></div>
+
           <div class="buttons">
             <button class="button" type="submit" id="sendBtn">Enviar</button>
           </div>
@@ -70,19 +77,30 @@
       <p>© 2023 por Luxo aluguel de iates</p>
     </footer>
 
-    <script src="js/jquery-3.6.4.min.js"></script>
-    <script src="js/api.js"></script>
+<script src="js/jquery-3.6.4.min.js"></script>
+<script src="js/api.js"></script>
 
-    <script>
+  <script>
       $(document).ready(function () {
-        $("#contatoForm").on("submit", function (e) {
+        $("#contatoForm").on("submit", async function (e) {
           e.preventDefault();
+
+          var $btn = $("#sendBtn");
+          var $feedback = $("#contatoFeedback");
+          $feedback.text("").css("color", "#a00");
+
           var nome = $("#nome").val().trim();
           var email = $("#email").val().trim();
           var mensagemTxt = $("#msg").val().trim();
 
           if (!nome || !email || !mensagemTxt) {
-            alert("Por favor, preencha todos os campos.");
+            $feedback.text("Por favor, preencha todos os campos.");
+            return;
+          }
+
+          if (!$("#email")[0].checkValidity()) {
+            $feedback.text("E-mail inválido.");
+            $("#email").focus();
             return;
           }
 
@@ -92,26 +110,23 @@
             mensagem: mensagemTxt,
           };
 
+          $btn.prop("disabled", true).text("Enviando...");
+
           try {
-            var resultado = inserirMensagem(mensagem);
-            if (resultado && typeof resultado.then === "function") {
-              resultado
-                .then(function () {
-                  alert("Mensagem enviada com sucesso!");
-                  $("#contatoForm")[0].reset();
-                })
-                .catch(function () {
-                  alert("Erro ao enviar a mensagem. Tente novamente.");
-                });
-            } else {
-              alert("Mensagem enviada com sucesso!");
-              $("#contatoForm")[0].reset();
-            }
+            await inserirMensagem(mensagem);
+            $feedback
+              .css("color", "green")
+              .text("Mensagem enviada com sucesso!");
+            $("#contatoForm")[0].reset();
           } catch (err) {
-            alert("Erro ao enviar a mensagem. Tente novamente.");
+            console.error(err);
+            $feedback.text("Erro ao enviar a mensagem. Tente novamente.");
+          } finally {
+            $btn.prop("disabled", false).text("Enviar");
           }
         });
       });
-    </script>
+  </script>
+    
   </body>
 </html>

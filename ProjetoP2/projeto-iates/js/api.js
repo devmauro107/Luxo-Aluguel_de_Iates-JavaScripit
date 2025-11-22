@@ -1,77 +1,68 @@
 function obterMensagens() {
-
-    var retorno = [];
-
-    var consulta = $.ajax({
-        url: 'https://app-p2-js-c88e9128234a.herokuapp.com/mensagens',
+    return fetch('https://app-p2-js-c88e9128234a.herokuapp.com/mensagens', {
         method: 'GET',
-        dataType: 'json',
-        async: false
-    }).fail(function(){
-        return retorno;
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (!response.ok) throw new Error('Erro ao obter mensagens: ' + response.status);
+        return response.json();
+    })
+    .catch(function(err) {
+        console.error(err);
+        return [];
     });
-
-    consulta.done(function(data) {
-        retorno = data;
-    });
-
-    return retorno;
 }
 
 function inserirMensagem(mensagem) {
+    // mensagem: { nome, email, mensagem }
+    // Retorna uma Promise com o resultado do POST (texto ou JSON)
 
-    /*
-
-    var mensagem = {
-            nome: "nome da pessoa", 
-            email: "email informado", 
-            mensagem: "a mensagem informada"} 
-
-    */
-
-    var inserir = $.ajax({
-
-        url: 'https://app-p2-js-c88e9128234a.herokuapp.com/mensagens',
+    return fetch('https://app-p2-js-c88e9128234a.herokuapp.com/mensagens', {
         method: 'POST',
-        data: JSON.stringify(mensagem),
-        dataType: 'json',
-        async: false,
-        contentType: 'application/json',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(mensagem)
+    })
+    .then(async function(response) {
+        const text = await response.text();
+
+        if (!response.ok) {
+            throw new Error('Erro ao inserir mensagem: ' + response.status + ' - ' + text);
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.warn("Resposta não é JSON. Conteúdo:", text);
+            return { mensagem: text };
+        }
     });
 }
 
 function validarUsuario(objLoginSenha) {
+    // objLoginSenha: { email, senha }
+    // Retorna uma Promise que resolve para true/false (ou false em caso de erro)
 
-    //email: admin@admin.com
-    //senha: '1234'
-
-    /*
-
-    var objLoginSenha = {
-            email: "email informado", 
-            senha: "senha informada"} 
-
-    */
-
-    var retorno = false;
-
-    var validacao = $.ajax({
-        url: 'https://app-p2-js-c88e9128234a.herokuapp.com/usuarios/validar',
+    return fetch('https://app-p2-js-c88e9128234a.herokuapp.com/usuarios/validar', {
         method: 'POST',
-        dataType: 'json',
-        async: false,
         headers: {
-            'Access-Control-Allow-Origin': '*'
-                },
-        contentType: 'application/json',
-        data: JSON.stringify(objLoginSenha)
-    }).fail(function(){
-        return retorno;
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(objLoginSenha)
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            return false;
+        }
+        return response.json();
+    })
+    .catch(function(err) {
+        console.error(err);
+        return false;
     });
-
-    validacao.done(function(data) {
-        retorno = data;
-    });
-
-    return retorno;
 }
